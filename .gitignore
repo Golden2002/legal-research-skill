@@ -1,0 +1,12 @@
+# 文件夹
+.DS_Store
+Thumbs.db
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OpenSkills 临时文件
+.openskills-temp-*
