@@ -90,6 +90,47 @@ def build_server() -> "FastMCP":
             return json.dumps({"ok": False, "error": str(e)[:200]},
                               ensure_ascii=False)
 
+    # W3-W4 ⭐ 差距补齐：案例检索 + 法律推理
+    @mcp.tool()
+    def extract_case_keywords_tool(case_text: str) -> str:
+        """案例关键词提取（案由/争点/事实→检索关键词）。"""
+        from case_retriever import extract_case_keywords, build_case_query
+        kw = extract_case_keywords(case_text)
+        return json.dumps({"ok": True, "keywords": kw,
+                           "query": build_case_query(kw)}, ensure_ascii=False)
+
+    @mcp.tool()
+    def reasoning_analysis_tool(method: str, params_json: str = "{}") -> str:
+        """法律推理分析（演绎/归纳/类比/溯因四类方法）。"""
+        import json as _json
+        from legal_reasoning import (
+            deductive_analysis, inductive_analysis,
+            analogical_analysis, abductive_analysis)
+        try:
+            p = _json.loads(params_json) if params_json else {}
+        except Exception:
+            p = {}
+        if method == "deductive":
+            r = deductive_analysis(p.get("major", ""), p.get("minor", ""),
+                                   p.get("conclusion", ""))
+        elif method == "inductive":
+            r = inductive_analysis(p.get("cases", []), p.get("rule", ""))
+        elif method == "analogical":
+            r = analogical_analysis(p.get("base_case", ""), p.get("target_case", ""),
+                                    p.get("similarity", ""))
+        elif method == "abductive":
+            r = abductive_analysis(p.get("fact", ""), p.get("hypotheses", []))
+        else:
+            r = {"ok": False, "error": f"未知推理方法: {method}（deductive/inductive/analogical/abductive）"}
+        return json.dumps(r, ensure_ascii=False)
+
+    @mcp.tool()
+    def recommend_reasoning_tool(question_type: str) -> str:
+        """按问题类型推荐法律推理方法。"""
+        from legal_reasoning import recommend_method
+        return json.dumps({"ok": True, "method": recommend_method(question_type)},
+                          ensure_ascii=False)
+
     return mcp
 
 
