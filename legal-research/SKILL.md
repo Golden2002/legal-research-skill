@@ -1526,3 +1526,58 @@ graph TD
 1. 只增加内容，不删除原有内容
 2. 记录更新日期和更新原因
 3. 标注新增内容的适用范围
+
+---
+
+## 能力升级模块（v1.1 ⭐——Python 工具模块）
+
+> 本 Skill 配套以下 Python 模块（可独立调用或经 MCP 接入 PAEG 生态）：
+> 目录 `legal-research/` 下 `src/`（校验与推理）+ `use_database_by_api/`（数据库接入）。
+
+### 1. 校验机制（legal_validator.py——三大校验）
+
+**法源效力校验**：`validate_source_level(类型A, 类型B)`——层级排序
+（宪法→法律→行政法规→司法解释→部门规章→地方性法规→地方政府规章→指导性案例→典型案例→规范性文件），
+判断一般/特别规定适用优先级。
+
+**新旧法时效校验**：`check_timeliness(法源列表)`——识别已废止/已修订法源，
+提示"以新法为准并注明时效节点"。
+
+**引用准确性校验**：`validate_citation(引用)`——格式检查（《法名》第X条）
++ 法名规范化（`normalize_law_name`：简称→全称，如"民法典"→"中华人民共和国民法典"）。
+
+**报告综合校验**：`validate_report(报告)`——效力+时效+引用三合一。
+
+### 2. 案例关键词检索（case_retriever.py）
+
+`extract_case_keywords(案情)`——案由词表（30+ 类案由）+ 争点模式
+（不履行/违约/解除/拖欠/侵权等）→ 收敛检索关键词。
+`build_case_query(关键词)` → 数据库/网页检索查询。
+
+### 3. 法律推理方法（legal_reasoning.py）
+
+四类结构化推理框架：
+- **演绎**（deductive）：大前提→小前提→结论（法条适用/构成要件）
+- **归纳**（inductive）：个案→规则（类案裁判倾向总结）
+- **类比**（analogical）：类案参照（关键相似点对比）
+- **溯因**（abductive）：事实→原因假设（事实认定/举证判断）
+`recommend_method(问题类型)` → 按问题推荐方法。
+
+### 4. 数据库接入（use_database_by_api/db_adapter.py——可扩展 ⭐）
+
+**用户可配置权威法律数据库 API**（配置方法对用户暴露）：
+1. 复制 `use_database_by_api/db_config.json.example` 为 `db_config.json`
+2. 填写对应数据库的 API 信息（enabled + api_key/endpoint）
+3. 支持：威科先行（已有完整集成）/ 北大法宝（待接入端点）/ 裁判文书网（待接入）
+4. 新增数据库 = 在 db_adapter.py 注册新适配器类（ADAPTER_REGISTRY）——不侵入核心
+
+### 5. MCP 标准化（mcp_server.py——9 工具）
+
+引用校验 / 时效校验 / 报告校验 / 法名规范 / 效力比较 /
+案例关键词提取 / 推理分析 / 推理推荐 / 数据库清单。
+可被 PAEG 主 Agent 调度（tools/list 动态发现）。
+
+### 6. 独立网页（web/——6 工具面板）
+
+引用校验 / 时效校验 / 报告校验 / 案例检索 / 法律推理 / 效力比较。
+`python -c "from web.web_api import create_app; create_app().run(port=5124)"` 启动。
