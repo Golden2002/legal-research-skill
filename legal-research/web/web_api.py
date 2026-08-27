@@ -32,7 +32,7 @@ from legal_reasoning import (  # noqa: E402
 )
 from case_retriever import extract_case_keywords, build_case_query  # noqa: E402
 
-_WEB_DIR = Path(__file__).resolve().parent / "web"
+_WEB_DIR = Path(__file__).resolve().parent  # web 目录
 
 
 def create_app(config: dict | None = None) -> Flask:
