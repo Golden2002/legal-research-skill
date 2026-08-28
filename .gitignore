@@ -10,3 +10,8 @@ Thumbs.db
 
 # OpenSkills 临时文件
 .openskills-temp-*
+
+# Python 缓存（纪律：不推云端）
+__pycache__/
+*.pyc
+.pytest_cache/
